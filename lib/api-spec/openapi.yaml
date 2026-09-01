@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API do sistema Estoque Fácil
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Cadastro e consulta de produtos
+  - name: movements
+    description: Entradas, saídas e histórico do estoque
+  - name: dashboard
+    description: Resumos para o painel principal
+  - name: reports
+    description: Relatórios operacionais
 paths:
   /healthz:
     get:
@@ -24,7 +32,319 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: Lista produtos
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/LowStock"
+        - $ref: "#/components/parameters/Active"
+      responses:
+        "200":
+          description: Lista de produtos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Cadastra um produto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Produto criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Consulta um produto
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Produto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Atualiza um produto
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Produto atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /products/{id}/status:
+    patch:
+      operationId: toggleProductStatus
+      tags: [products]
+      summary: Ativa ou desativa um produto
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductStatusInput"
+      responses:
+        "200":
+          description: Status atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /movements:
+    get:
+      operationId: listMovements
+      tags: [movements]
+      summary: Lista o histórico de movimentações
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+        - $ref: "#/components/parameters/MovementType"
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Histórico de movimentações
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Movement"
+  /movements/entry:
+    post:
+      operationId: createEntry
+      tags: [movements]
+      summary: Registra uma entrada de mercadorias
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovementInput"
+      responses:
+        "201":
+          description: Entrada registrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movement"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /movements/exit:
+    post:
+      operationId: createExit
+      tags: [movements]
+      summary: Registra uma saída de mercadorias
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovementInput"
+      responses:
+        "201":
+          description: Saída registrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movement"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Retorna o resumo do estoque
+      responses:
+        "200":
+          description: Resumo do dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /dashboard/low-stock:
+    get:
+      operationId: getLowStockProducts
+      tags: [dashboard]
+      summary: Lista produtos com estoque baixo
+      responses:
+        "200":
+          description: Produtos abaixo do estoque mínimo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+  /dashboard/recent-movements:
+    get:
+      operationId: getRecentMovements
+      tags: [dashboard]
+      summary: Lista movimentações recentes
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Movimentações recentes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Movement"
+  /reports/stock:
+    get:
+      operationId: getStockReport
+      tags: [reports]
+      summary: Retorna relatório consolidado do estoque
+      responses:
+        "200":
+          description: Relatório de estoque
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockReportItem"
+  /reports/movements:
+    get:
+      operationId: getMovementReport
+      tags: [reports]
+      summary: Retorna relatório de movimentações
+      parameters:
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
+      responses:
+        "200":
+          description: Resumo de movimentações
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovementReport"
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    ProductId:
+      name: productId
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+    Search:
+      name: search
+      in: query
+      schema:
+        type: string
+    LowStock:
+      name: lowStock
+      in: query
+      schema:
+        type: boolean
+    Active:
+      name: active
+      in: query
+      schema:
+        type: boolean
+    MovementType:
+      name: type
+      in: query
+      schema:
+        $ref: "#/components/schemas/MovementType"
+    From:
+      name: from
+      in: query
+      schema:
+        type: string
+        format: date
+    To:
+      name: to
+      in: query
+      schema:
+        type: string
+        format: date
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  responses:
+    BadRequest:
+      description: Dados inválidos
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Operação não permitida
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +353,231 @@ components:
           type: string
       required:
         - status
+    Product:
+      type: object
+      required:
+        - id
+        - code
+        - name
+        - description
+        - salePrice
+        - costPrice
+        - currentStock
+        - minimumStock
+        - active
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        salePrice:
+          type: number
+          format: double
+        costPrice:
+          type: ["number", "null"]
+          format: double
+        currentStock:
+          type: integer
+        minimumStock:
+          type: integer
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ProductInput:
+      type: object
+      required: [code, name, salePrice, minimumStock]
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: ["string", "null"]
+          maxLength: 500
+        salePrice:
+          type: number
+          minimum: 0
+        costPrice:
+          type: ["number", "null"]
+          minimum: 0
+        initialStock:
+          type: integer
+          minimum: 0
+          default: 0
+        minimumStock:
+          type: integer
+          minimum: 0
+    ProductUpdate:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: ["string", "null"]
+          maxLength: 500
+        salePrice:
+          type: number
+          minimum: 0
+        costPrice:
+          type: ["number", "null"]
+          minimum: 0
+        minimumStock:
+          type: integer
+          minimum: 0
+    ProductStatusInput:
+      type: object
+      required: [active]
+      properties:
+        active:
+          type: boolean
+    MovementType:
+      type: string
+      enum: [ENTRY, EXIT]
+    MovementInput:
+      type: object
+      required: [productId, quantity, movementDate]
+      properties:
+        productId:
+          type: integer
+          minimum: 1
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          type: ["number", "null"]
+          minimum: 0
+        movementDate:
+          type: string
+          format: date-time
+        reason:
+          type: ["string", "null"]
+          maxLength: 100
+        notes:
+          type: ["string", "null"]
+          maxLength: 500
+    Movement:
+      type: object
+      required:
+        - id
+        - productId
+        - productName
+        - type
+        - quantity
+        - unitPrice
+        - stockBefore
+        - stockAfter
+        - movementDate
+        - reason
+        - notes
+        - createdAt
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        type:
+          $ref: "#/components/schemas/MovementType"
+        quantity:
+          type: integer
+        unitPrice:
+          type: ["number", "null"]
+          format: double
+        stockBefore:
+          type: integer
+        stockAfter:
+          type: integer
+        movementDate:
+          type: string
+          format: date-time
+        reason:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+    DashboardSummary:
+      type: object
+      required:
+        - activeProducts
+        - totalItems
+        - lowStockProducts
+        - movementsThisMonth
+        - stockValue
+      properties:
+        activeProducts:
+          type: integer
+        totalItems:
+          type: integer
+        lowStockProducts:
+          type: integer
+        movementsThisMonth:
+          type: integer
+        stockValue:
+          type: number
+          format: double
+    StockReportItem:
+      type: object
+      required: [productId, code, name, currentStock, minimumStock, salePrice, stockValue, status]
+      properties:
+        productId:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        currentStock:
+          type: integer
+        minimumStock:
+          type: integer
+        salePrice:
+          type: number
+          format: double
+        stockValue:
+          type: number
+          format: double
+        status:
+          type: string
+          enum: [OK, LOW, OUT]
+    MovementReport:
+      type: object
+      required: [entries, exits, totalEntryItems, totalExitItems]
+      properties:
+        entries:
+          type: integer
+        exits:
+          type: integer
+        totalEntryItems:
+          type: integer
+        totalExitItems:
+          type: integer
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
 

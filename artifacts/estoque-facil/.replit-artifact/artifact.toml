@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Estoque Fácil"
+description = "Sistema web de controle de estoque para pequenas empresas, com cadastro de produtos, entradas, saídas, alertas de estoque baixo, histórico e relatórios básicos."
+version = "1.0.0"
+id = "artifacts/estoque-facil"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26003
+
+[services.development]
+run = "pnpm --filter @workspace/estoque-facil run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/estoque-facil", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/estoque-facil/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26003"
+BASE_PATH = "/"

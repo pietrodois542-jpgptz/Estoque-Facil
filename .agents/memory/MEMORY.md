@@ -1,0 +1,1 @@
+- [Inventory app validation](inventory-app-validation.md) — OpenAPI generation and Vite preview builds need explicit workspace-compatible settings.
