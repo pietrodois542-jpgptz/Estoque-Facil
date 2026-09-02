@@ -36,15 +36,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-20 items-center justify-between border-b border-sidebar-border px-6">
+        <div className="flex h-20 items-center justify-between border-b border-sidebar-border px-6 lg:justify-center">
           <Link
             href="/"
             onClick={() => setOpen(false)}
-            className="flex min-w-0 items-center"
+            className="flex min-w-0 items-center lg:shrink-0"
             data-testid="link-logo"
           >
             <span
-              className="flex h-12 w-[158px] items-center overflow-hidden rounded-lg bg-white px-2"
+              className="flex h-[54px] w-[176px] shrink-0 items-center overflow-hidden rounded-lg bg-white px-3"
               data-logo-slot="scpe-logo"
               aria-label="Logotipo oficial da SCPE"
             >
@@ -133,11 +133,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link
             href="/"
             onClick={() => setOpen(false)}
-            className="ml-3 flex items-center lg:hidden"
+            className="ml-4 flex shrink-0 items-center lg:hidden"
             data-testid="link-mobile-brand"
           >
             <span
-              className="flex h-9 w-[104px] items-center overflow-hidden rounded-md bg-white px-1"
+              className="flex h-10 w-[clamp(104px,31vw,120px)] shrink-0 items-center overflow-hidden rounded-md bg-white px-2"
               data-logo-slot="scpe-logo-mobile"
               aria-label="Logotipo oficial da SCPE"
             >
