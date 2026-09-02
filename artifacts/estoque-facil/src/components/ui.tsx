@@ -35,7 +35,7 @@ export function StatusPill({ status }: { status: "OK" | "LOW" | "OUT" | "active"
 
 export function PageHeader({ eyebrow, title, description, action }: { eyebrow?: string; title: string; description?: string; action?: ReactNode }) {
   return <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-    <div><div className="mb-2 font-mono text-[11px] font-medium uppercase tracking-[.16em] text-primary">{eyebrow || "Estoque Fácil"}</div><h1 className="text-3xl font-extrabold tracking-[-.04em] text-foreground sm:text-[2.6rem]">{title}</h1>{description && <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</p>}</div>
+    <div><div className="mb-2 font-mono text-[11px] font-medium uppercase tracking-[.16em] text-primary">{eyebrow || "SCPE – Gestão Inteligente de Estoque"}</div><h1 className="text-3xl font-extrabold tracking-[-.04em] text-foreground sm:text-[2.6rem]">{title}</h1>{description && <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</p>}</div>
     {action}
   </div>;
 }
