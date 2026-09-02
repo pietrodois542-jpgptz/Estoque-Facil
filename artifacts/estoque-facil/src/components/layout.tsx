@@ -7,6 +7,7 @@ import {
   Menu,
   PackageMinus,
   PackagePlus,
+  UsersRound,
   X,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
@@ -18,6 +19,7 @@ const nav = [
   { href: "/saida", label: "Saída", icon: PackageMinus },
   { href: "/movimentacoes", label: "Movimentações", icon: ClipboardList },
   { href: "/relatorios", label: "Relatórios", icon: BarChart3 },
+  { href: "/equipe", label: "Equipe", icon: UsersRound },
 ];
 
 const brandLogo = `${import.meta.env.BASE_URL}branding/logo-scpe-cropped.jpg`;

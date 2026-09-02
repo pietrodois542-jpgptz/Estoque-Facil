@@ -11,10 +11,11 @@ import ProductForm from "@/pages/product-form";
 import MovementForm from "@/pages/movement-form";
 import Movements from "@/pages/movements";
 import Reports from "@/pages/reports";
+import Team from "@/pages/team";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 function RoutedErrorBoundary({ children }: { children: ReactNode }) { const [location] = useLocation(); return <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>; }
-function Router() { return <AppShell><RoutedErrorBoundary><Switch><Route path="/" component={Dashboard} /><Route path="/produtos" component={Products} /><Route path="/produtos/novo" component={ProductForm} /><Route path="/produtos/:id/editar" component={ProductForm} /><Route path="/entrada"><MovementForm type="ENTRY" /></Route><Route path="/saida"><MovementForm type="EXIT" /></Route><Route path="/movimentacoes" component={Movements} /><Route path="/relatorios" component={Reports} /><Route component={NotFound} /></Switch></RoutedErrorBoundary></AppShell>; }
+function Router() { return <AppShell><RoutedErrorBoundary><Switch><Route path="/" component={Dashboard} /><Route path="/produtos" component={Products} /><Route path="/produtos/novo" component={ProductForm} /><Route path="/produtos/:id/editar" component={ProductForm} /><Route path="/entrada"><MovementForm type="ENTRY" /></Route><Route path="/saida"><MovementForm type="EXIT" /></Route><Route path="/movimentacoes" component={Movements} /><Route path="/relatorios" component={Reports} /><Route path="/equipe" component={Team} /><Route component={NotFound} /></Switch></RoutedErrorBoundary></AppShell>; }
 function App() { return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}><Router /></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>; }
 export default App;
