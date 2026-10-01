@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+<defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#0754d6"/></linearGradient></defs>
+<circle cx="160" cy="160" r="150" fill="#eff6ff"/>
+<path d="M82 177c-20-74 12-137 78-137 67 0 101 58 79 133-9 32-29 64-52 91-13 15-40 15-54 0-24-27-42-56-51-87z" fill="url(#b)"/>
+<path d="M104 92c19-36 91-42 113 1-17-13-36-17-56-13-20-4-39 0-57 12z" fill="#1267e8"/>
+<ellipse cx="127" cy="132" rx="39" ry="45" fill="#fff"/><ellipse cx="194" cy="132" rx="39" ry="45" fill="#fff"/>
+<ellipse cx="133" cy="135" rx="13" ry="18" fill="#3b2416"/><ellipse cx="188" cy="135" rx="13" ry="18" fill="#3b2416"/>
+<circle cx="136" cy="131" r="5" fill="#fff"/><circle cx="191" cy="131" r="5" fill="#fff"/>
+<path d="M160 139c-37-7-47 18-25 38 9 8 17 13 25 17 8-4 17-9 26-17 22-20 12-45-26-38z" fill="#1f2937"/>
+<path d="M143 174c12 7 23 7 35 0-3 18-31 18-35 0z" fill="#ef4444"/>
+<path d="M93 188c-34 2-57 22-64 55 30-5 55-16 76-35zM227 188c34 2 57 22 64 55-30-5-55-16-76-35z" fill="#1267e8"/>
+<path d="M113 224h94v52c-28 19-66 19-94 0z" fill="#111827"/>
+<text x="160" y="256" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-style="italic" font-size="27" fill="#fff">SCPE</text>
+</svg>
