@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 420">
+<defs>
+ <linearGradient id="feather" x1=".2" y1="0" x2=".8" y2="1"><stop stop-color="#2990ff"/><stop offset=".5" stop-color="#0965e8"/><stop offset="1" stop-color="#0344b7"/></linearGradient>
+ <linearGradient id="hood" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#252a32"/><stop offset="1" stop-color="#090b0f"/></linearGradient>
+ <radialGradient id="face"><stop stop-color="#fff"/><stop offset="1" stop-color="#e7eef7"/></radialGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-opacity=".25"/></filter>
+</defs>
+<g filter="url(#shadow)">
+<!-- tail -->
+<path d="M214 319c40 22 82 24 128 11-33 30-76 43-137 34z" fill="#0759d6"/>
+<path d="M207 326c34 28 69 39 111 37-40 21-80 22-121-5z" fill="#0d73f2"/>
+<!-- body / hoodie -->
+<ellipse cx="180" cy="292" rx="99" ry="100" fill="url(#hood)"/>
+<path d="M104 245c22-33 48-46 76-46s56 14 77 47c-21 18-47 27-77 27s-55-9-76-28z" fill="#161a20"/>
+<path d="M124 223c-21 10-40 34-51 67-9 27-4 44 13 46 20 2 38-25 51-61z" fill="url(#feather)"/>
+<path d="M236 223c21 10 40 34 51 67 9 27 4 44-13 46-20 2-38-25-51-61z" fill="url(#feather)"/>
+<!-- head -->
+<ellipse cx="180" cy="146" rx="111" ry="119" fill="url(#feather)"/>
+<!-- crest -->
+<path d="M112 54C105 21 126 4 154 5c-11 12-15 25-12 39 3-29 25-43 53-43-14 14-20 28-18 43 11-26 34-34 57-25-17 8-28 21-33 39z" fill="#0870ef"/>
+<!-- white face patches -->
+<path d="M91 119c9-48 45-70 82-44 11 8 16 21 10 39-11 33-35 67-66 67-28 0-34-29-26-62z" fill="url(#face)"/>
+<path d="M269 119c-9-48-45-70-82-44-11 8-16 21-10 39 11 33 35 67 66 67 28 0 34-29 26-62z" fill="url(#face)"/>
+<!-- eyes -->
+<ellipse cx="137" cy="120" rx="25" ry="32" fill="#fff" stroke="#222" stroke-width="3"/>
+<ellipse cx="223" cy="120" rx="25" ry="32" fill="#fff" stroke="#222" stroke-width="3"/>
+<ellipse cx="143" cy="124" rx="13" ry="19" fill="#8a4b19"/><ellipse cx="217" cy="124" rx="13" ry="19" fill="#8a4b19"/>
+<ellipse cx="145" cy="126" rx="7" ry="12" fill="#101216"/><ellipse cx="215" cy="126" rx="7" ry="12" fill="#101216"/>
+<circle cx="149" cy="119" r="4" fill="#fff"/><circle cx="219" cy="119" r="4" fill="#fff"/>
+<!-- beak -->
+<path d="M180 132c-48-5-67 27-45 57 12 17 29 27 45 34 16-7 33-17 45-34 22-30 3-62-45-57z" fill="#262a31"/>
+<path d="M180 132c-35-2-50 14-47 35 17-9 32-12 47-11 15-1 30 2 47 11 3-21-12-37-47-35z" fill="#3b414b"/>
+<path d="M153 192c17 11 37 11 54 0-5 27-49 27-54 0z" fill="#e94a4a"/>
+<!-- hoodie details -->
+<path d="M135 236c12 14 28 21 45 21s33-7 45-21" fill="none" stroke="#343a45" stroke-width="10" stroke-linecap="round"/>
+<path d="M145 245l-7 55M215 245l7 55" stroke="#050608" stroke-width="5" stroke-linecap="round"/>
+<circle cx="138" cy="301" r="5" fill="#777"/><circle cx="222" cy="301" r="5" fill="#777"/>
+<rect x="122" y="276" width="116" height="52" rx="12" fill="#0b0d11"/>
+<text x="180" y="309" text-anchor="middle" font-family="Arial,sans-serif" font-size="31" font-weight="900" font-style="italic" fill="white">SCPE</text>
+<path d="M128 316c36 8 70 8 105-3" fill="none" stroke="#1682ff" stroke-width="5" stroke-linecap="round"/>
+<!-- feet -->
+<path d="M135 372c-20 2-32 12-39 28 15-6 28-6 39-1 10-8 22-9 36-2-5-17-17-26-36-25zM225 372c20 2 32 12 39 28-15-6-28-6-39-1-10-8-22-9-36-2 5-17 17-26 36-25z" fill="#343941"/>
+</g></svg>

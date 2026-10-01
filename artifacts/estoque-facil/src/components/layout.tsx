@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { BlueAssistant } from "@/components/blue-assistant";
 
 const nav = [
   { href: "/", label: "Visão geral", icon: LayoutDashboard },
@@ -172,6 +173,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
         <div className="mx-auto max-w-[1440px] p-5 sm:p-8">{children}</div>
       </main>
+      <BlueAssistant />
     </div>
   );
 }
