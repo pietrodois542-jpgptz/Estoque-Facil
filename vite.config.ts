@@ -19,6 +19,7 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   root: frontendDir,
+  envDir: import.meta.dirname,
   build: {
     outDir: path.resolve(frontendDir, 'dist'),
     emptyOutDir: true,
