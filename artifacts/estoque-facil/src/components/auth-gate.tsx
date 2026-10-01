@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { Eye, EyeOff } from "lucide-react";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -18,7 +19,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 function AuthScreen() {
   const [register, setRegister] = useState(false);
   const [name,setName]=useState(""); const [email,setEmail]=useState(""); const [password,setPassword]=useState("");
-  const [message,setMessage]=useState(""); const [busy,setBusy]=useState(false);
+  const [message,setMessage]=useState(""); const [busy,setBusy]=useState(false); const [showPassword,setShowPassword]=useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault(); setMessage(""); setBusy(true);
     if (register) {
@@ -43,7 +44,7 @@ function AuthScreen() {
       <form onSubmit={submit} className="grid gap-4">
         {register && <input required value={name} onChange={e=>setName(e.target.value)} className="h-11 rounded-xl border px-3" placeholder="Nome"/>}
         <input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="h-11 rounded-xl border px-3" placeholder="E-mail"/>
-        <input required type="password" minLength={6} value={password} onChange={e=>setPassword(e.target.value)} className="h-11 rounded-xl border px-3" placeholder="Senha (mínimo 6 caracteres)"/>
+        <div className="relative"><input required type={showPassword ? "text" : "password"} minLength={6} value={password} onChange={e=>setPassword(e.target.value)} className="h-11 w-full rounded-xl border px-3 pr-11" placeholder="Senha (mínimo 6 caracteres)"/><button type="button" onClick={()=>setShowPassword(v=>!v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}>{showPassword ? <EyeOff size={19}/> : <Eye size={19}/>}</button></div>
         {message && <div className="rounded-xl bg-muted p-3 text-sm">{message}</div>}
         <button disabled={busy} className="h-11 rounded-xl bg-primary font-bold text-primary-foreground disabled:opacity-60">{busy ? "Aguarde..." : register ? "Criar conta" : "Entrar"}</button>
       </form>
