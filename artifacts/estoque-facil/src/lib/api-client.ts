@@ -245,9 +245,6 @@ async function fetchProducts(params?: ListProductsParams): Promise<Product[]> {
     const ilike = `%${params.search}%`;
     query = query.or(`name.ilike.${ilike},code.ilike.${ilike}`);
   }
-  if (params?.lowStock) {
-    query = query.filter('current_stock', 'lte', 'minimum_stock');
-  }
   if (params?.active !== undefined) {
     query = query.eq('active', params.active);
   }
@@ -256,7 +253,13 @@ async function fetchProducts(params?: ListProductsParams): Promise<Product[]> {
 
   const { data, error } = await query;
   if (error) throw new ApiError(error.message, 500, error);
-  return (data as ProductRow[]).map(mapProduct);
+
+  let rows = data as ProductRow[];
+  if (params?.lowStock) {
+    rows = rows.filter((p) => p.current_stock <= p.minimum_stock);
+  }
+
+  return rows.map(mapProduct);
 }
 
 async function fetchProduct(id: number): Promise<Product> {
@@ -454,11 +457,13 @@ async function fetchLowStockProducts(): Promise<Product[]> {
     .from('products')
     .select('*')
     .eq('active', true)
-    .filter('current_stock', 'lte', 'minimum_stock')
-    .order('current_stock')
     .order('name');
   if (error) throw new ApiError(error.message, 500, error);
-  return (data as ProductRow[]).map(mapProduct);
+
+  return (data as ProductRow[])
+    .filter((p) => p.current_stock <= p.minimum_stock)
+    .sort((a, b) => a.current_stock - b.current_stock || a.name.localeCompare(b.name))
+    .map(mapProduct);
 }
 
 async function fetchRecentMovements(
