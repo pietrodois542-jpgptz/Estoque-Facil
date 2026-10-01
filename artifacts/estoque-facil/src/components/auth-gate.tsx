@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LogOut } from "lucide-react";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -13,7 +13,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }, []);
   if (!ready) return <div className="grid min-h-screen place-items-center">Carregando SCPE...</div>;
   if (!session) return <AuthScreen />;
-  return <>{children}</>;
+  return <>{children}<button type="button" onClick={()=>supabase.auth.signOut()} className="fixed right-5 top-20 z-40 flex items-center gap-2 rounded-xl border bg-background px-3 py-2 text-sm font-semibold shadow-md hover:bg-muted" aria-label="Sair da conta"><LogOut size={17}/>Sair</button></>;
 }
 
 function AuthScreen() {
