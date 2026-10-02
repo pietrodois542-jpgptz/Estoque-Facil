@@ -30,7 +30,7 @@ import {
   Textarea,
 } from "@/components/ui";
 
-export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
+function localDateValue(date = new Date()) {\n  const year = date.getFullYear();\n  const month = String(date.getMonth() + 1).padStart(2, "0");\n  const day = String(date.getDate()).padStart(2, "0");\n  return `${year}-${month}-${day}`;\n}\n\nexport default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
   const entry = type === "ENTRY";
   const [, setLocation] = useLocation();
   const products = useListProducts({ active: true });
@@ -39,7 +39,7 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     productId: "",
     quantity: "",
     unitPrice: "",
-    movementDate: new Date().toISOString().slice(0, 10),
+    movementDate: localDateValue(),
     reason: "",
     notes: "",
   });
