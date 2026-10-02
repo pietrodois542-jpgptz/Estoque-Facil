@@ -44,6 +44,7 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     notes: "",
   });
   const [done, setDone] = useState(false);
+  const [confirmExit, setConfirmExit] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const createEntry = useCreateEntry();
   const createExit = useCreateExit();
@@ -74,12 +75,12 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    if (!entry) {
-      const selected = products.data?.find((product) => product.id === Number(form.productId));
-      const ok = window.confirm(`Confirmar saída de ${quantity} unidade${quantity === 1 ? "" : "s"}${selected ? ` de "${selected.name}"` : ""}?`);
-      if (!ok) return;
+    if (!entry && !confirmExit) {
+      setConfirmExit(true);
+      return;
     }
 
+    setConfirmExit(false);
     mutation.mutate(
       {
         data: {
@@ -141,8 +142,23 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     );
   }
 
+  const selectedProduct = products.data?.find((product) => product.id === Number(form.productId));
+
   return (
     <div className="mx-auto max-w-3xl animate-rise-in">
+      {confirmExit && !entry && (
+        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/45 p-4" role="dialog" aria-modal="true" aria-labelledby="confirm-exit-title">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-background p-6 shadow-2xl">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary"><ArrowUpFromLine size={22} /></div>
+            <h2 id="confirm-exit-title" className="mt-4 text-center text-xl font-extrabold">Confirmar saída</h2>
+            <p className="mt-2 text-center text-sm leading-6 text-muted-foreground">Você deseja registrar a saída de <strong className="text-foreground">{Number(form.quantity)} unidade{Number(form.quantity) === 1 ? "" : "s"}</strong>{selectedProduct ? <> de <strong className="text-foreground">{selectedProduct.name}</strong></> : null}?</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button type="button" onClick={() => setConfirmExit(false)} className="bg-secondary text-secondary-foreground">Cancelar</Button>
+              <Button type="button" onClick={() => { setConfirmExit(false); const fakeEvent = { preventDefault() {} } as FormEvent; submit(fakeEvent); }} className="bg-foreground text-background"><ArrowUpFromLine size={16}/>Confirmar saída</Button>
+            </div>
+          </div>
+        </div>
+      )}
       <Link
         href="/"
         data-testid="link-back-movement"
