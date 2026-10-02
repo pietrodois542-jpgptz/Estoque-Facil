@@ -149,12 +149,12 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
   return (
     <div className="mx-auto max-w-3xl animate-rise-in">
       {confirmExit && !entry && (
-        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/45 p-4" role="dialog" aria-modal="true" aria-labelledby="confirm-exit-title">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-background p-6 shadow-2xl">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 p-5 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-labelledby="confirm-exit-title">
+          <div className="w-full max-w-[460px] overflow-hidden rounded-2xl border border-border bg-background p-7 shadow-2xl">
             <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary"><ArrowUpFromLine size={22} /></div>
             <h2 id="confirm-exit-title" className="mt-4 text-center text-xl font-extrabold">Confirmar saída</h2>
-            <p className="mt-2 text-center text-sm leading-6 text-muted-foreground">Você deseja registrar a saída de <strong className="text-foreground">{Number(form.quantity)} unidade{Number(form.quantity) === 1 ? "" : "s"}</strong>{selectedProduct ? <> de <strong className="text-foreground">{selectedProduct.name}</strong></> : null}?</p>
-            <div className="mt-6 flex justify-end gap-3">
+            <p className="mx-auto mt-2 max-w-sm text-center text-sm leading-6 text-muted-foreground">Você deseja registrar a saída de <strong className="text-foreground">{Number(form.quantity)} unidade{Number(form.quantity) === 1 ? "" : "s"}</strong>{selectedProduct ? <> de <strong className="text-foreground">{selectedProduct.name}</strong></> : null}?</p>
+            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
               <Button type="button" onClick={() => setConfirmExit(false)} className="bg-secondary text-secondary-foreground">Cancelar</Button>
               <Button type="button" onClick={() => { setConfirmExit(false); setExitConfirmed(true); setTimeout(() => document.querySelector<HTMLFormElement>('form[data-movement-form="true"]')?.requestSubmit(), 0); }} className="bg-foreground text-background"><ArrowUpFromLine size={16}/>Confirmar saída</Button>
             </div>
