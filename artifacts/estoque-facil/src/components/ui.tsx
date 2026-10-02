@@ -56,7 +56,8 @@ export function ErrorState({ onRetry }: { onRetry: () => void }) {
   return <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-8 text-center" data-testid="error-state"><AlertCircle className="mx-auto mb-3 text-destructive" size={26} /><p className="font-bold">Não foi possível carregar os dados.</p><Button onClick={onRetry} data-testid="button-retry" className="mt-4 bg-card text-foreground ring-1 ring-border"><RefreshCw size={15} />Tentar novamente</Button></div>;
 }
 export function EmptyState({ title, detail }: { title: string; detail: string }) {
-  return <div className="rounded-xl border border-dashed border-border bg-card/60 p-10 text-center" data-testid="empty-state"><PackageOpen className="mx-auto mb-3 text-muted-foreground" size={30} /><p className="font-bold">{title}</p><p className="mt-1 text-sm text-muted-foreground">{detail}</p></div>;
+  const blueMascot = `${import.meta.env.BASE_URL}branding/blue-mascot.svg`;
+  return <div className="rounded-xl border border-dashed border-border bg-card/60 p-10 text-center" data-testid="empty-state"><span className="mx-auto mb-3 grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-primary/10"><img src={blueMascot} alt="" className="h-full w-full object-contain" /></span><p className="font-bold">{title}</p><p className="mx-auto mt-1 max-w-md text-sm leading-6 text-muted-foreground">{detail}</p></div>;
 }
 export function Saving({ label = "Salvando..." }: { label?: string }) { return <><Loader2 className="animate-spin" size={16} />{label}</>; }
 export function SuccessMark({ children }: { children: ReactNode }) { return <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary"><Check size={16} />{children}</span>; }

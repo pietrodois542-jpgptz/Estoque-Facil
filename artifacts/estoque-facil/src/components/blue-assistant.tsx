@@ -8,16 +8,23 @@ const suggestions = [
   "Como registrar uma entrada?",
   "Como registrar uma saída?",
   "Como gerar um relatório?",
+  "Como editar um produto?",
+  "O que é estoque mínimo?",
 ];
 
 function answer(question: string) {
   const q = question.toLowerCase();
-  if (q.includes("cadastr") || q.includes("produto")) return "Abra Produtos e clique em Novo produto. Preencha código, nome, preço, estoque mínimo e os demais campos.";
+  if (q.includes("editar") && q.includes("produto")) return "Abra Produtos, localize o item que deseja alterar e use a opção de edição. Revise os dados antes de salvar.";
+  if ((q.includes("estoque") && (q.includes("mínimo") || q.includes("minimo"))) || q.includes("abaixo do mínimo") || q.includes("abaixo do minimo")) return "O estoque mínimo é a quantidade de segurança definida para cada produto. Na Visão geral, o SCPE destaca os itens que chegaram a esse limite ou ficaram abaixo dele.";
+  if (q.includes("movimenta") || q.includes("histórico") || q.includes("historico")) return "Abra Movimentações para consultar o histórico de entradas e saídas registradas no SCPE.";
+  if (q.includes("export") || q.includes("pdf") || q.includes("imprimir")) return "Abra Relatórios e use Exportar para preparar os dados para impressão ou PDF.";
+  if (q.includes("cadastr") || q.includes("novo produto")) return "Abra Produtos e clique em Novo produto. Preencha código, nome, preço, estoque mínimo e os demais campos antes de salvar.";
   if (q.includes("entrada")) return "Abra Entrada, escolha o produto, informe a quantidade e registre a movimentação.";
   if (q.includes("saída") || q.includes("saida")) return "Abra Saída, escolha o produto e a quantidade. O SCPE bloqueia automaticamente uma saída maior que o estoque disponível.";
   if (q.includes("relat")) return "Abra Relatórios para conferir entradas, saídas e a saúde do estoque. O botão Exportar permite gerar uma versão para impressão ou PDF.";
-  if (q.includes("estoque") || q.includes("mínimo") || q.includes("minimo")) return "Na Visão geral, o SCPE destaca produtos que chegaram ao estoque mínimo ou ficaram abaixo dele.";
-  return "Posso ajudar com produtos, entradas, saídas, estoque mínimo, movimentações e relatórios do SCPE.";
+  if (q.includes("desativ")) return "Abra Produtos, localize o produto e escolha a opção de desativação. Confira se selecionou o item correto antes de confirmar.";
+  if (q.includes("ajuda") || q.includes("o que você") || q.includes("o que voce")) return "Posso orientar você sobre cadastro e edição de produtos, entradas, saídas, estoque mínimo, movimentações, relatórios e exportação.";
+  return "Não encontrei uma orientação específica para essa pergunta. Posso ajudar com produtos, entradas, saídas, estoque mínimo, movimentações, relatórios e exportação do SCPE.";
 }
 
 export function BlueAssistant() {

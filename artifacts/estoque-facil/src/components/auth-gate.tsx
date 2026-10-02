@@ -11,7 +11,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
     return () => data.subscription.unsubscribe();
   }, []);
-  if (!ready) return <div className="grid min-h-screen place-items-center">Carregando SCPE...</div>;
+  if (!ready) return <div className="grid min-h-screen place-items-center bg-muted/30 p-5"><div className="text-center"><img src={`${import.meta.env.BASE_URL}branding/blue-mascot.svg`} alt="Blue" className="mx-auto h-24 w-24 animate-pulse object-contain"/><div className="mt-4 text-lg font-extrabold">Carregando SCPE</div><div className="mt-1 text-sm text-muted-foreground">Preparando seu sistema de estoque...</div><div className="mx-auto mt-4 h-1.5 w-40 overflow-hidden rounded-full bg-muted"><div className="h-full w-2/3 animate-pulse rounded-full bg-primary"/></div></div></div>;
   if (!session) return <AuthScreen />;
   return <>{children}<button type="button" onClick={()=>supabase.auth.signOut()} className="fixed right-5 top-20 z-40 flex items-center gap-2 rounded-xl border bg-background px-3 py-2 text-sm font-semibold shadow-md hover:bg-muted" aria-label="Sair da conta"><LogOut size={17}/>Sair</button></>;
 }
@@ -22,9 +22,10 @@ function AuthScreen() {
   const [message,setMessage]=useState(""); const [busy,setBusy]=useState(false); const [showPassword,setShowPassword]=useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault(); setMessage(""); setBusy(true);
+    if (register && name.trim().length < 2) { setMessage("Informe seu nome."); setBusy(false); return; }
     if (register) {
       const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name } } });
-      setMessage(error ? error.message : data.session ? "Conta criada." : "Conta criada. Confira seu e-mail para confirmar.");
+      setMessage(error ? "Não foi possível criar a conta. Verifique os dados e tente novamente." : data.session ? "Conta criada com sucesso." : "Conta criada. Confira seu e-mail para confirmar.");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setMessage("E-mail ou senha inválidos.");

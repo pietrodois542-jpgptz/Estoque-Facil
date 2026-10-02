@@ -446,7 +446,7 @@ async function fetchDashboardSummary(): Promise<DashboardSummary> {
     ).length,
     movementsThisMonth,
     stockValue: rows.reduce(
-      (s, p) => s + p.current_stock * (p.cost_price ?? 0),
+      (s, p) => s + p.current_stock * Number(p.cost_price ?? p.sale_price),
       0,
     ),
   };

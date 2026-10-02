@@ -30,7 +30,7 @@ import {
   Textarea,
 } from "@/components/ui";
 
-export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
+function localDateValue(date = new Date()) {\n  const year = date.getFullYear();\n  const month = String(date.getMonth() + 1).padStart(2, "0");\n  const day = String(date.getDate()).padStart(2, "0");\n  return `${year}-${month}-${day}`;\n}\n\nexport default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
   const entry = type === "ENTRY";
   const [, setLocation] = useLocation();
   const products = useListProducts({ active: true });
@@ -39,11 +39,12 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     productId: "",
     quantity: "",
     unitPrice: "",
-    movementDate: new Date().toISOString().slice(0, 10),
+    movementDate: localDateValue(),
     reason: "",
     notes: "",
   });
   const [done, setDone] = useState(false);
+  const [confirmExit, setConfirmExit] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const createEntry = useCreateEntry();
   const createExit = useCreateExit();
@@ -57,6 +58,23 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     key: keyof typeof form,
   ) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((current) => ({ ...current, [key]: event.target.value }));
+
+  const confirmExitMovement = () => {
+    const quantity = Number(form.quantity);
+    const unitPrice = form.unitPrice ? Number(form.unitPrice) : null;
+    setConfirmExit(false);
+    mutation.mutate(
+      { data: { productId: Number(form.productId), quantity, unitPrice, movementDate: form.movementDate, reason: form.reason.trim() || null, notes: form.notes.trim() || null } },
+      { onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListMovementsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetLowStockProductsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetRecentMovementsQueryKey({ limit: 6 }) });
+        setDone(true);
+      } },
+    );
+  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -74,6 +92,12 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
+    if (!entry) {
+      setConfirmExit(true);
+      return;
+    }
+
+    setConfirmExit(false);
     mutation.mutate(
       {
         data: {
@@ -107,10 +131,10 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
           <CheckCircle2 size={32} />
         </div>
         <h1 className="mt-5 text-3xl font-extrabold tracking-[-.04em]">
-          Movimento registrado
+          {entry ? "Entrada registrada" : "Saída registrada"}
         </h1>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
-          O saldo do produto foi atualizado e o registro já está disponível no histórico.
+          {entry ? "A entrada foi concluída e o saldo do produto já foi atualizado." : "A saída foi concluída e o novo saldo já está disponível no histórico."}
         </p>
         <div className="mt-7 flex justify-center gap-3">
           <Button
@@ -135,8 +159,23 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     );
   }
 
+  const selectedProduct = products.data?.find((product) => product.id === Number(form.productId));
+
   return (
     <div className="mx-auto max-w-3xl animate-rise-in">
+      {confirmExit && !entry && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="confirm-exit-title">
+          <div className="relative w-full max-w-[420px] rounded-2xl border border-border bg-background p-6 shadow-2xl sm:p-7">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary"><ArrowUpFromLine size={22} /></div>
+            <h2 id="confirm-exit-title" className="mt-4 text-center text-xl font-extrabold">Confirmar saída</h2>
+            <p className="mx-auto mt-2 max-w-sm text-center text-sm leading-6 text-muted-foreground">Você deseja registrar a saída de <strong className="text-foreground">{Number(form.quantity)} unidade{Number(form.quantity) === 1 ? "" : "s"}</strong>{selectedProduct ? <> de <strong className="text-foreground">{selectedProduct.name}</strong></> : null}?</p>
+            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
+              <Button type="button" onClick={() => setConfirmExit(false)} className="bg-secondary text-secondary-foreground">Cancelar</Button>
+              <Button type="button" onClick={confirmExitMovement} className="bg-foreground text-background"><ArrowUpFromLine size={16}/>Confirmar saída</Button>
+            </div>
+          </div>
+        </div>
+      )}
       <Link
         href="/"
         data-testid="link-back-movement"
