@@ -45,7 +45,6 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
   });
   const [done, setDone] = useState(false);
   const [confirmExit, setConfirmExit] = useState(false);
-  const [exitConfirmed, setExitConfirmed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const createEntry = useCreateEntry();
   const createExit = useCreateExit();
@@ -59,6 +58,23 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     key: keyof typeof form,
   ) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((current) => ({ ...current, [key]: event.target.value }));
+
+  const confirmExitMovement = () => {
+    const quantity = Number(form.quantity);
+    const unitPrice = form.unitPrice ? Number(form.unitPrice) : null;
+    setConfirmExit(false);
+    mutation.mutate(
+      { data: { productId: Number(form.productId), quantity, unitPrice, movementDate: form.movementDate, reason: form.reason.trim() || null, notes: form.notes.trim() || null } },
+      { onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListMovementsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetLowStockProductsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetRecentMovementsQueryKey({ limit: 6 }) });
+        setDone(true);
+      } },
+    );
+  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -76,13 +92,12 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    if (!entry && !exitConfirmed) {
+    if (!entry) {
       setConfirmExit(true);
       return;
     }
 
     setConfirmExit(false);
-    setExitConfirmed(false);
     mutation.mutate(
       {
         data: {
@@ -149,14 +164,14 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
   return (
     <div className="mx-auto max-w-3xl animate-rise-in">
       {confirmExit && !entry && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 p-5 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-labelledby="confirm-exit-title">
-          <div className="w-full max-w-[460px] overflow-hidden rounded-2xl border border-border bg-background p-7 shadow-2xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="confirm-exit-title">
+          <div className="relative w-full max-w-[420px] rounded-2xl border border-border bg-background p-6 shadow-2xl sm:p-7">
             <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary"><ArrowUpFromLine size={22} /></div>
             <h2 id="confirm-exit-title" className="mt-4 text-center text-xl font-extrabold">Confirmar saída</h2>
             <p className="mx-auto mt-2 max-w-sm text-center text-sm leading-6 text-muted-foreground">Você deseja registrar a saída de <strong className="text-foreground">{Number(form.quantity)} unidade{Number(form.quantity) === 1 ? "" : "s"}</strong>{selectedProduct ? <> de <strong className="text-foreground">{selectedProduct.name}</strong></> : null}?</p>
             <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
               <Button type="button" onClick={() => setConfirmExit(false)} className="bg-secondary text-secondary-foreground">Cancelar</Button>
-              <Button type="button" onClick={() => { setConfirmExit(false); setExitConfirmed(true); setTimeout(() => document.querySelector<HTMLFormElement>('form[data-movement-form="true"]')?.requestSubmit(), 0); }} className="bg-foreground text-background"><ArrowUpFromLine size={16}/>Confirmar saída</Button>
+              <Button type="button" onClick={confirmExitMovement} className="bg-foreground text-background"><ArrowUpFromLine size={16}/>Confirmar saída</Button>
             </div>
           </div>
         </div>
@@ -190,7 +205,6 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
       ) : (
         <form
           onSubmit={submit}
-          data-movement-form="true"
           className="overflow-hidden rounded-xl border border-card-border bg-card shadow-sm"
         >
           {mutationError && (
