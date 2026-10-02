@@ -56,10 +56,6 @@ export default function Team() {
           </article>
         ))}
       </section>
-
-      <p className="mt-8 border-t border-border pt-5 text-center text-xs font-semibold text-muted-foreground">
-        SCPE – Gestão Inteligente de Estoque | Desenvolvido pela equipe SCPE.
-      </p>
     </div>
   );
 }
