@@ -172,6 +172,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <div className="mx-auto max-w-[1440px] p-5 sm:p-8">{children}</div>
+        <footer className="mx-auto max-w-[1440px] px-5 pb-24 pt-2 text-center text-[11px] text-muted-foreground sm:px-8 sm:pb-8">
+          <span className="font-semibold">SCPE</span> • Gestão Inteligente de Estoque • 2026
+          <span className="mx-2">•</span><Link href="/equipe" className="font-semibold hover:text-primary">Equipe SCPE</Link>
+        </footer>
       </main>
       <BlueAssistant />
     </div>
