@@ -4,7 +4,14 @@ import { Button, EmptyState, ErrorState, LoadingState, PageHeader, StatusPill } 
 import { useState } from "react";
 
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-function localDateValue(date: Date) {\n  const year = date.getFullYear();\n  const month = String(date.getMonth() + 1).padStart(2, "0");\n  const day = String(date.getDate()).padStart(2, "0");\n  return `${year}-${month}-${day}`;\n}\n\nexport default function Reports() {
+function localDateValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export default function Reports() {
   const [range, setRange] = useState("month"); const now = new Date(); const start = range === "month" ? localDateValue(new Date(now.getFullYear(), now.getMonth(), 1)) : localDateValue(new Date(now.getFullYear(), 0, 1)); const end = localDateValue(now);
   const stock = useGetStockReport(); const movement = useGetMovementReport({ from: start, to: end });
   const retry = () => { stock.refetch(); movement.refetch(); };
