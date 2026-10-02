@@ -45,6 +45,7 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
   });
   const [done, setDone] = useState(false);
   const [confirmExit, setConfirmExit] = useState(false);
+  const [exitConfirmed, setExitConfirmed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const createEntry = useCreateEntry();
   const createExit = useCreateExit();
@@ -75,12 +76,13 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    if (!entry && !confirmExit) {
+    if (!entry && !exitConfirmed) {
       setConfirmExit(true);
       return;
     }
 
     setConfirmExit(false);
+    setExitConfirmed(false);
     mutation.mutate(
       {
         data: {
@@ -154,7 +156,7 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
             <p className="mt-2 text-center text-sm leading-6 text-muted-foreground">Você deseja registrar a saída de <strong className="text-foreground">{Number(form.quantity)} unidade{Number(form.quantity) === 1 ? "" : "s"}</strong>{selectedProduct ? <> de <strong className="text-foreground">{selectedProduct.name}</strong></> : null}?</p>
             <div className="mt-6 flex justify-end gap-3">
               <Button type="button" onClick={() => setConfirmExit(false)} className="bg-secondary text-secondary-foreground">Cancelar</Button>
-              <Button type="button" onClick={() => { setConfirmExit(false); const fakeEvent = { preventDefault() {} } as FormEvent; submit(fakeEvent); }} className="bg-foreground text-background"><ArrowUpFromLine size={16}/>Confirmar saída</Button>
+              <Button type="button" onClick={() => { setConfirmExit(false); setExitConfirmed(true); setTimeout(() => document.querySelector<HTMLFormElement>('form[data-movement-form="true"]')?.requestSubmit(), 0); }} className="bg-foreground text-background"><ArrowUpFromLine size={16}/>Confirmar saída</Button>
             </div>
           </div>
         </div>
@@ -188,6 +190,7 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
       ) : (
         <form
           onSubmit={submit}
+          data-movement-form="true"
           className="overflow-hidden rounded-xl border border-card-border bg-card shadow-sm"
         >
           {mutationError && (
