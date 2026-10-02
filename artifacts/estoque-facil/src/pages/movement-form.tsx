@@ -74,6 +74,12 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
+    if (!entry) {
+      const selected = products.data?.find((product) => product.id === Number(form.productId));
+      const ok = window.confirm(`Confirmar saída de ${quantity} unidade${quantity === 1 ? "" : "s"}${selected ? ` de "${selected.name}"` : ""}?`);
+      if (!ok) return;
+    }
+
     mutation.mutate(
       {
         data: {
@@ -107,10 +113,10 @@ export default function MovementForm({ type }: { type: "ENTRY" | "EXIT" }) {
           <CheckCircle2 size={32} />
         </div>
         <h1 className="mt-5 text-3xl font-extrabold tracking-[-.04em]">
-          Movimento registrado
+          {entry ? "Entrada registrada" : "Saída registrada"}
         </h1>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
-          O saldo do produto foi atualizado e o registro já está disponível no histórico.
+          {entry ? "A entrada foi concluída e o saldo do produto já foi atualizado." : "A saída foi concluída e o novo saldo já está disponível no histórico."}
         </p>
         <div className="mt-7 flex justify-center gap-3">
           <Button
