@@ -5,13 +5,13 @@ import { BlueAssistant } from "@/components/blue-assistant";
 import { useAuth } from "@/components/auth-gate";
 
 const nav = [
-  { href: "/", label: "Visão geral", icon: LayoutDashboard },
-  { href: "/produtos", label: "Produtos", icon: Boxes },
-  { href: "/entrada", label: "Entrada", icon: PackagePlus },
-  { href: "/saida", label: "Saída", icon: PackageMinus },
+  { href: "/", label: "Início", icon: LayoutDashboard },
+  { href: "/sustentabilidade", label: "Impacto ambiental", icon: Leaf },
+  { href: "/produtos", label: "Materiais e produtos", icon: Boxes },
+  { href: "/entrada", label: "Registrar entrada", icon: PackagePlus },
+  { href: "/saida", label: "Registrar saída", icon: PackageMinus },
   { href: "/movimentacoes", label: "Movimentações", icon: ClipboardList },
-  { href: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/sustentabilidade", label: "Sustentabilidade", icon: Leaf },
+  { href: "/relatorios", label: "Relatórios de gestão", icon: BarChart3 },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -28,10 +28,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="min-w-0"><div className="font-display text-[17px] font-bold tracking-[-.04em]">PROJETECH</div><div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[.18em] text-sidebar-foreground/55">Sustentabilidade</div></div>
           </div>
           <button className="absolute right-5 top-7 rounded-lg p-2 text-sidebar-foreground/60 hover:bg-sidebar-accent lg:hidden" onClick={() => setOpen(false)} aria-label="Fechar menu"><X size={18} /></button>
-          <div className="mt-6 flex items-center gap-2 border-t border-sidebar-border pt-4 text-[10px] font-mono uppercase tracking-[.15em] text-sidebar-foreground/50"><span className="h-1.5 w-1.5 rounded-full bg-sidebar-primary" />Gestão de estoque</div>
+          <div className="mt-6 flex items-center gap-2 border-t border-sidebar-border pt-4 text-[10px] font-mono uppercase tracking-[.15em] text-sidebar-foreground/50"><span className="h-1.5 w-1.5 rounded-full bg-sidebar-primary" />Gestão sustentável de recursos</div>
         </div>
         <div className="px-4 pt-6">
-          <div className="mb-3 px-3 font-mono text-[9px] uppercase tracking-[.2em] text-sidebar-foreground/40">Operação</div>
+          <div className="mb-3 px-3 font-mono text-[9px] uppercase tracking-[.2em] text-sidebar-foreground/40">Sustentabilidade e gestão</div>
           <nav className="grid gap-1">
             {nav.map(({ href, label, icon: Icon }) => {
               const active = href === "/" ? location === "/" : location.startsWith(href);
@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mt-auto p-4">
           <div className="rounded-2xl border border-sidebar-border bg-sidebar-accent/60 p-4">
             <div className="flex items-center gap-2 text-xs font-bold"><Leaf size={14} className="text-sidebar-primary" />Gestão responsável</div>
-            <p className="mt-2 text-[11px] leading-[1.65] text-sidebar-foreground/55">Visibilidade sobre saldos e movimentos ajuda a planejar melhor cada reposição.</p>
+            <p className="mt-2 text-[11px] leading-[1.65] text-sidebar-foreground/55">Controle de materiais, uso consciente e decisões para evitar desperdícios.</p>
           </div>
           <div className="mt-4 flex items-center gap-2 border-t border-sidebar-border pt-4 text-[10px] text-sidebar-foreground/40"><span className="font-mono">PROJETECH</span><span>·</span><span>Controle que orienta</span></div>
         </div>
@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-border/80 bg-background/90 px-4 backdrop-blur-xl sm:px-8">
           <div className="flex items-center gap-3">
             <button className="rounded-lg p-2 text-foreground hover:bg-muted lg:hidden" onClick={() => setOpen(true)} aria-label="Abrir menu"><Menu size={20} /></button>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="hidden sm:inline">Estoque</span><span className="hidden sm:inline text-border">/</span><span className="font-bold text-foreground">{current}</span></div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="hidden sm:inline">PROJETECH</span><span className="hidden sm:inline text-border">/</span><span className="font-bold text-foreground">{current}</span></div>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block"><div className="text-[11px] font-bold text-foreground">PROJETECH Sustentabilidade</div><div className="mt-0.5 font-mono text-[9px] text-muted-foreground">{new Intl.DateTimeFormat("pt-BR", { weekday: "short", day: "2-digit", month: "short" }).format(new Date())}</div></div>
@@ -62,7 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <div className="mx-auto max-w-[1440px] p-4 sm:p-8">{children}</div>
-        <footer className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-2 px-5 pb-24 pt-2 text-[10px] text-muted-foreground sm:flex-row sm:px-8 sm:pb-8"><span><span className="font-semibold text-foreground">PROJETECH</span> · Gestão de estoque responsável</span></footer>
+        <footer className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-2 px-5 pb-24 pt-2 text-[10px] text-muted-foreground sm:flex-row sm:px-8 sm:pb-8"><span><span className="font-semibold text-foreground">PROJETECH</span> · Tecnologia para reduzir desperdícios</span></footer>
       </main>
       <BlueAssistant />
     </div>
