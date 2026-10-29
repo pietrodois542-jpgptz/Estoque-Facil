@@ -3,7 +3,7 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API do SCPE – Gestão Inteligente de Estoque
+  description: API da PROJETECH Sustentabilidade – Gestão de Estoque
 servers:
   - url: /api
     description: Base API path
@@ -354,7 +354,7 @@ components:
     SessionCookie:
       type: apiKey
       in: cookie
-      name: scpe_session
+      name: projetech_session
   parameters:
     Id:
       name: id

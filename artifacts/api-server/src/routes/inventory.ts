@@ -26,6 +26,7 @@ import {
   UpdateProductParams,
   UpdateProductResponse,
 } from "@workspace/api-zod";
+import { requireAuth, requireSameOrigin } from "../lib/auth";
 import {
   createMovement,
   createProduct,
@@ -42,6 +43,7 @@ import {
 } from "../lib/inventory";
 
 const router: IRouter = Router();
+router.use(requireSameOrigin, requireAuth);
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Erro inesperado.";

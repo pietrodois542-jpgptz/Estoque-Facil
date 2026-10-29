@@ -1,1 +1,2 @@
 - [Inventory app validation](inventory-app-validation.md) — OpenAPI generation and Vite preview builds need explicit workspace-compatible settings.
+- [Drizzle error causes](drizzle-error-causes.md) — PostgreSQL error codes may be nested under `cause`; traverse the chain before mapping constraint conflicts.

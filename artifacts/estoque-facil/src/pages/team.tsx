@@ -29,12 +29,12 @@ export default function Team() {
     <div className="animate-rise-in">
       <PageHeader
         eyebrow="Estrutura"
-        title="Equipe SCPE"
+        title="Equipe PROJETECH"
         description="As pessoas por trás do desenvolvimento e da evolução do sistema."
       />
 
       <section
-        aria-label="Integrantes da equipe SCPE"
+        aria-label="Integrantes da equipe PROJETECH"
         className="grid gap-4 sm:grid-cols-2"
       >
         {team.map(({ name, role, icon: Icon }) => (

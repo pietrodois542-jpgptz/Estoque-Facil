@@ -172,6 +172,7 @@ async function request<T>(route: string, options?: RequestInit): Promise<T> {
   try {
     response = await fetch(`${apiBase}/api${route}`, {
       ...options,
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', ...options?.headers },
     });
   } catch {
