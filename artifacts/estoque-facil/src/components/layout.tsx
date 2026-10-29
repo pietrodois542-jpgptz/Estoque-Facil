@@ -11,6 +11,7 @@ const nav = [
   { href: "/saida", label: "Saída", icon: PackageMinus },
   { href: "/movimentacoes", label: "Movimentações", icon: ClipboardList },
   { href: "/relatorios", label: "Relatórios", icon: BarChart3 },
+  { href: "/sustentabilidade", label: "Sustentabilidade", icon: Leaf },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
