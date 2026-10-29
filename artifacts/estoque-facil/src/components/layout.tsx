@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react";
-import { BarChart3, Boxes, ClipboardList, LayoutDashboard, Menu, PackageMinus, PackagePlus, UsersRound, X, Leaf, LogOut } from "lucide-react";
+import { BarChart3, Boxes, ClipboardList, LayoutDashboard, Menu, PackageMinus, PackagePlus, X, Leaf, LogOut } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { BlueAssistant } from "@/components/blue-assistant";
 import { useAuth } from "@/components/auth-gate";
@@ -11,7 +11,6 @@ const nav = [
   { href: "/saida", label: "Saída", icon: PackageMinus },
   { href: "/movimentacoes", label: "Movimentações", icon: ClipboardList },
   { href: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/equipe", label: "Equipe", icon: UsersRound },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -62,7 +61,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <div className="mx-auto max-w-[1440px] p-4 sm:p-8">{children}</div>
-        <footer className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-2 px-5 pb-24 pt-2 text-[10px] text-muted-foreground sm:flex-row sm:px-8 sm:pb-8"><span><span className="font-semibold text-foreground">PROJETECH</span> · Gestão de estoque responsável</span><Link href="/equipe" className="font-semibold hover:text-primary">Conheça a equipe</Link></footer>
+        <footer className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-2 px-5 pb-24 pt-2 text-[10px] text-muted-foreground sm:flex-row sm:px-8 sm:pb-8"><span><span className="font-semibold text-foreground">PROJETECH</span> · Gestão de estoque responsável</span></footer>
       </main>
       <BlueAssistant />
     </div>
