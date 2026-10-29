@@ -8,11 +8,13 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { usersTable } from "./auth-users";
 
 export const productsTable = pgTable(
   "products",
   {
     id: serial("id").primaryKey(),
+    ownerId: integer("owner_id").references(() => usersTable.id),
     code: text("code").notNull(),
     name: text("name").notNull(),
     description: text("description"),
@@ -38,7 +40,7 @@ export const productsTable = pgTable(
       .$onUpdate(() => new Date()),
   },
   (table) => ({
-    codeUnique: uniqueIndex("products_code_unique").on(table.code),
+    codeUnique: uniqueIndex("products_owner_code_unique").on(table.ownerId, table.code),
   }),
 );
 
