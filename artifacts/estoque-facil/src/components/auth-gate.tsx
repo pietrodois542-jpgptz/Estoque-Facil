@@ -51,7 +51,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       setLocation("/login");
     }
   };
-  if (!ready) return <div className="grid min-h-[100dvh] place-items-center p-5"><div className="w-full max-w-xs text-center"><img src={`${import.meta.env.BASE_URL}branding/blue-mascot.svg`} alt="Blue, mascote da PROJETECH" className="mx-auto h-28 w-28 object-contain" /><div className="mt-3 font-display text-xl font-bold">PROJETECH</div><div className="mt-1 text-sm text-muted-foreground">Preparando seu espaço de estoque</div><div className="skeleton mx-auto mt-6 h-1.5 w-40 rounded-full" /></div></div>;
+  if (!ready) return <div className="grid min-h-[100dvh] place-items-center p-5"><div className="w-full max-w-xs text-center"><img src={`${import.meta.env.BASE_URL}branding/blue-mascot.svg`} alt="Blue, mascote da PROJETEC" className="mx-auto h-28 w-28 object-contain" /><div className="mt-3 font-display text-xl font-bold">PROJETEC</div><div className="mt-1 text-sm text-muted-foreground">Preparando seu espaço de estoque</div><div className="skeleton mx-auto mt-6 h-1.5 w-40 rounded-full" /></div></div>;
   if (!user) return <AuthScreen onAuthenticated={(next) => { setUser(next); setLocation("/"); }} />;
   if (isAuthRoute) return null;
   return <AuthContext.Provider value={{ user, signOut }}>{children}</AuthContext.Provider>;
@@ -85,13 +85,13 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
     <aside className="relative hidden overflow-hidden bg-sidebar px-12 py-10 text-sidebar-foreground lg:flex lg:flex-col lg:justify-between">
       <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full border border-sidebar-foreground/10" />
       <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full border border-sidebar-foreground/10" />
-      <div className="relative flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}branding/blue-mascot.svg`} alt="Blue" className="h-14 w-14 object-contain" /><div><div className="font-display text-xl font-bold tracking-tight">PROJETECH</div><div className="text-[10px] uppercase tracking-[.2em] text-sidebar-foreground/55">Gestão de estoque</div></div></div>
+      <div className="relative flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}branding/blue-mascot.svg`} alt="Blue" className="h-14 w-14 object-contain" /><div><div className="font-display text-xl font-bold tracking-tight">PROJETEC</div><div className="text-[10px] uppercase tracking-[.2em] text-sidebar-foreground/55">Gestão de estoque</div></div></div>
       <div className="relative max-w-lg pb-10"><div className="mb-5 inline-flex items-center gap-2 rounded-full border border-sidebar-border px-3 py-1.5 text-xs text-sidebar-foreground/70"><ShieldCheck size={14} />Controle claro. Decisões melhores.</div><h1 className="font-display text-5xl font-bold leading-[1.04] tracking-[-.05em]">Seu estoque,<br />em boas mãos.</h1><p className="mt-5 max-w-md text-sm leading-6 text-sidebar-foreground/65">Acompanhe produtos e movimentos com informações organizadas para apoiar uma operação mais responsável.</p></div>
-      <div className="relative text-[11px] text-sidebar-foreground/45">PROJETECH Sustentabilidade · Operação e controle</div>
+      <div className="relative text-[11px] text-sidebar-foreground/45">PROJETEC Sustentabilidade · Operação e controle</div>
     </aside>
     <section className="flex items-center justify-center px-5 py-10 sm:px-10">
       <div className="w-full max-w-md">
-        <div className="mb-8 flex items-center gap-3 lg:hidden"><img src={`${import.meta.env.BASE_URL}branding/blue-mascot.svg`} alt="Blue, mascote da PROJETECH" className="h-14 w-14 object-contain" /><div><div className="font-display text-lg font-bold">PROJETECH</div><div className="text-xs text-muted-foreground">Sustentabilidade · Estoque</div></div></div>
+        <div className="mb-8 flex items-center gap-3 lg:hidden"><img src={`${import.meta.env.BASE_URL}branding/blue-mascot.svg`} alt="Blue, mascote da PROJETEC" className="h-14 w-14 object-contain" /><div><div className="font-display text-lg font-bold">PROJETEC</div><div className="text-xs text-muted-foreground">Sustentabilidade · Estoque</div></div></div>
         <div className="mb-7"><p className="font-mono text-[10px] uppercase tracking-[.19em] text-primary">Acesso seguro</p><h2 className="mt-2 font-display text-3xl font-bold tracking-[-.04em]">{register ? "Criar sua conta" : "Bom ter você de volta"}</h2><p className="mt-2 text-sm text-muted-foreground">Entre para acompanhar a operação do seu estoque.</p></div>
         <div className="mb-6 grid grid-cols-2 rounded-xl bg-muted p-1">
           <button type="button" onClick={() => { setLocation("/login"); setMessage(""); }} className={`rounded-lg py-2.5 text-sm font-bold transition ${!register ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Entrar</button>
