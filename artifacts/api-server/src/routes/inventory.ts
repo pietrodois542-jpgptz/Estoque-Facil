@@ -43,6 +43,7 @@ import {
 } from "../lib/inventory";
 
 const router: IRouter = Router();
+const owner = (res: { locals: Record<string, any> }): number => res.locals.authUser.id;
 router.use(requireSameOrigin, requireAuth);
 
 function errorMessage(error: unknown) {
@@ -73,7 +74,7 @@ router.get("/products", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const products = await listProducts(parsed.data);
+  const products = await listProducts(owner(res), parsed.data);
   res.json(ListProductsResponse.parse(products));
 });
 
@@ -84,7 +85,7 @@ router.post("/products", async (req, res): Promise<void> => {
     return;
   }
   try {
-    const product = await createProduct(parsed.data);
+    const product = await createProduct(owner(res), parsed.data);
     res.status(201).json(CreateProductResponse.parse(product));
   } catch (error) {
     if ((error as { code?: string }).code === "23505") {
@@ -101,7 +102,7 @@ router.get("/products/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: params.error.message });
     return;
   }
-  const product = await getProduct(params.data.id);
+  const product = await getProduct(owner(res), params.data.id);
   if (!product) {
     res.status(404).json({ error: "Produto não encontrado." });
     return;
@@ -121,7 +122,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
     return;
   }
   try {
-    const product = await updateProduct(params.data.id, body.data);
+    const product = await updateProduct(owner(res), params.data.id, body.data);
     if (!product) {
       res.status(404).json({ error: "Produto não encontrado." });
       return;
@@ -147,7 +148,7 @@ router.patch("/products/:id/status", async (req, res): Promise<void> => {
     res.status(400).json({ error: body.error.message });
     return;
   }
-  const product = await toggleProductStatus(params.data.id, body.data.active);
+  const product = await toggleProductStatus(owner(res), params.data.id, body.data.active);
   if (!product) {
     res.status(404).json({ error: "Produto não encontrado." });
     return;
@@ -163,7 +164,7 @@ router.get("/movements", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const movements = await listMovements(parsed.data);
+  const movements = await listMovements(owner(res), parsed.data);
   res.json(ListMovementsResponse.parse(movements));
 });
 
@@ -174,7 +175,7 @@ router.post("/movements/entry", async (req, res): Promise<void> => {
     return;
   }
   try {
-    const movement = await createMovement("ENTRY", parsed.data);
+    const movement = await createMovement(owner(res), "ENTRY", parsed.data);
     res.status(201).json(CreateEntryResponse.parse(movement));
   } catch (error) {
     const status =
@@ -190,7 +191,7 @@ router.post("/movements/exit", async (req, res): Promise<void> => {
     return;
   }
   try {
-    const movement = await createMovement("EXIT", parsed.data);
+    const movement = await createMovement(owner(res), "EXIT", parsed.data);
     res.status(201).json(CreateExitResponse.parse(movement));
   } catch (error) {
     const status =
@@ -200,12 +201,12 @@ router.post("/movements/exit", async (req, res): Promise<void> => {
 });
 
 router.get("/dashboard/summary", async (_req, res): Promise<void> => {
-  const summary = await getDashboardSummary();
+  const summary = await getDashboardSummary(owner(res));
   res.json(GetDashboardSummaryResponse.parse(summary));
 });
 
 router.get("/dashboard/low-stock", async (_req, res): Promise<void> => {
-  const products = await getLowStockProducts();
+  const products = await getLowStockProducts(owner(res));
   res.json(GetLowStockProductsResponse.parse(products));
 });
 
@@ -215,12 +216,12 @@ router.get("/dashboard/recent-movements", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const movements = await getRecentMovements(parsed.data.limit);
+  const movements = await getRecentMovements(owner(res), parsed.data.limit);
   res.json(GetRecentMovementsResponse.parse(movements));
 });
 
 router.get("/reports/stock", async (_req, res): Promise<void> => {
-  const report = await getStockReport();
+  const report = await getStockReport(owner(res));
   res.json(GetStockReportResponse.parse(report));
 });
 
@@ -232,7 +233,7 @@ router.get("/reports/movements", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const report = await getMovementReport(parsed.data);
+  const report = await getMovementReport(owner(res), parsed.data);
   res.json(GetMovementReportResponse.parse(report));
 });
 
