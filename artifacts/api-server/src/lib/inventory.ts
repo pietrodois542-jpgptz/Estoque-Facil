@@ -30,20 +30,20 @@ function mapProduct(product: typeof productsTable.$inferSelect) {
   return product;
 }
 
-async function findProduct(productId: number) {
+async function findProduct(ownerId: number, productId: number) {
   const [product] = await db
     .select()
     .from(productsTable)
-    .where(eq(productsTable.id, productId));
+    .where(and(eq(productsTable.id, productId), eq(productsTable.ownerId, ownerId)));
   return product;
 }
 
-export async function listProducts(filters: {
+export async function listProducts(ownerId: number, filters: {
   search?: string;
   lowStock?: boolean;
   active?: boolean;
 }) {
-  const conditions = [];
+  const conditions = [eq(productsTable.ownerId, ownerId)];
   if (filters.search) {
     const search = `%${filters.search}%`;
     conditions.push(
@@ -67,17 +67,18 @@ export async function listProducts(filters: {
   return products.map(mapProduct);
 }
 
-export async function getProduct(productId: number) {
-  const product = await findProduct(productId);
+export async function getProduct(ownerId: number, productId: number) {
+  const product = await findProduct(ownerId, productId);
   return product ? mapProduct(product) : undefined;
 }
 
-export async function createProduct(data: ProductInput) {
+export async function createProduct(ownerId: number, data: ProductInput) {
   return db.transaction(async (tx) => {
     const initialStock = data.initialStock ?? 0;
     const [product] = await tx
       .insert(productsTable)
       .values({
+        ownerId,
         code: data.code.trim(),
         name: data.name.trim(),
         description: data.description ?? null,
@@ -90,6 +91,7 @@ export async function createProduct(data: ProductInput) {
 
     if (initialStock > 0) {
       await tx.insert(stockMovementsTable).values({
+        ownerId,
         productId: product.id,
         type: "ENTRY",
         quantity: initialStock,
@@ -106,7 +108,7 @@ export async function createProduct(data: ProductInput) {
   });
 }
 
-export async function updateProduct(productId: number, data: ProductUpdate) {
+export async function updateProduct(ownerId: number, productId: number, data: ProductUpdate) {
   const updates: Record<string, unknown> = {};
   if (data.code !== undefined) updates.code = data.code.trim();
   if (data.name !== undefined) updates.name = data.name.trim();
@@ -118,22 +120,22 @@ export async function updateProduct(productId: number, data: ProductUpdate) {
   }
 
   if (Object.keys(updates).length === 0) {
-    return getProduct(productId);
+    return getProduct(ownerId, productId);
   }
 
   const [product] = await db
     .update(productsTable)
     .set(updates)
-    .where(eq(productsTable.id, productId))
+    .where(and(eq(productsTable.id, productId), eq(productsTable.ownerId, ownerId)))
     .returning();
   return product ? mapProduct(product) : undefined;
 }
 
-export async function toggleProductStatus(productId: number, active: boolean) {
+export async function toggleProductStatus(ownerId: number, productId: number, active: boolean) {
   const [product] = await db
     .update(productsTable)
     .set({ active })
-    .where(eq(productsTable.id, productId))
+    .where(and(eq(productsTable.id, productId), eq(productsTable.ownerId, ownerId)))
     .returning();
   return product ? mapProduct(product) : undefined;
 }
@@ -155,14 +157,14 @@ function movementSelection() {
   };
 }
 
-export async function listMovements(filters: {
+export async function listMovements(ownerId: number, filters: {
   productId?: number;
   type?: MovementKind;
   from?: Date;
   to?: Date;
   limit?: number;
 }) {
-  const conditions = [];
+  const conditions = [eq(stockMovementsTable.ownerId, ownerId), eq(productsTable.ownerId, ownerId)];
   if (filters.productId !== undefined) {
     conditions.push(eq(stockMovementsTable.productId, filters.productId));
   }
@@ -188,16 +190,16 @@ export async function listMovements(filters: {
   return filters.limit === undefined ? query : query.limit(filters.limit);
 }
 
-export async function createMovement(kind: MovementKind, data: MovementInput) {
+export async function createMovement(ownerId: number, kind: MovementKind, data: MovementInput) {
   return db.transaction(async (tx) => {
     await tx.execute(
-      sql`SELECT id FROM ${productsTable} WHERE id = ${data.productId} FOR UPDATE`,
+      sql`SELECT id FROM ${productsTable} WHERE id = ${data.productId} AND owner_id = ${ownerId} FOR UPDATE`,
     );
 
     const [product] = await tx
       .select()
       .from(productsTable)
-      .where(eq(productsTable.id, data.productId));
+      .where(and(eq(productsTable.id, data.productId), eq(productsTable.ownerId, ownerId)));
 
     if (!product) {
       const error = new Error("Produto não encontrado.");
@@ -227,11 +229,12 @@ export async function createMovement(kind: MovementKind, data: MovementInput) {
     await tx
       .update(productsTable)
       .set({ currentStock: stockAfter })
-      .where(eq(productsTable.id, product.id));
+      .where(and(eq(productsTable.id, product.id), eq(productsTable.ownerId, ownerId)));
 
     const [movement] = await tx
       .insert(stockMovementsTable)
       .values({
+        ownerId,
         productId: product.id,
         type: kind,
         quantity: data.quantity,
@@ -251,10 +254,10 @@ export async function createMovement(kind: MovementKind, data: MovementInput) {
   });
 }
 
-export async function getDashboardSummary() {
+export async function getDashboardSummary(ownerId: number) {
   const [products, movements] = await Promise.all([
-    db.select().from(productsTable).where(eq(productsTable.active, true)),
-    db.select().from(stockMovementsTable),
+    db.select().from(productsTable).where(and(eq(productsTable.active, true), eq(productsTable.ownerId, ownerId))),
+    db.select().from(stockMovementsTable).where(eq(stockMovementsTable.ownerId, ownerId)),
   ]);
 
   const now = new Date();
@@ -277,28 +280,29 @@ export async function getDashboardSummary() {
   };
 }
 
-export async function getLowStockProducts() {
+export async function getLowStockProducts(ownerId: number) {
   return db
     .select()
     .from(productsTable)
     .where(
       and(
         eq(productsTable.active, true),
+        eq(productsTable.ownerId, ownerId),
         sql`${productsTable.currentStock} <= ${productsTable.minimumStock}`,
       ),
     )
     .orderBy(productsTable.currentStock, productsTable.name);
 }
 
-export async function getRecentMovements(limit: number) {
-  return listMovements({ limit });
+export async function getRecentMovements(ownerId: number, limit: number) {
+  return listMovements(ownerId, { limit });
 }
 
-export async function getStockReport() {
+export async function getStockReport(ownerId: number) {
   const products = await db
     .select()
     .from(productsTable)
-    .where(eq(productsTable.active, true))
+    .where(and(eq(productsTable.active, true), eq(productsTable.ownerId, ownerId)))
     .orderBy(productsTable.name);
 
   return products.map((product) => ({
@@ -318,8 +322,8 @@ export async function getStockReport() {
   }));
 }
 
-export async function getMovementReport(filters: { from?: Date; to?: Date }) {
-  const movements = await listMovements({
+export async function getMovementReport(ownerId: number, filters: { from?: Date; to?: Date }) {
+  const movements = await listMovements(ownerId, {
     ...filters,
   });
   const entries = movements.filter((movement) => movement.type === "ENTRY");
