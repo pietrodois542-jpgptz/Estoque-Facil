@@ -5,7 +5,6 @@ import {
   type UseQueryOptions,
   type QueryKey,
 } from '@tanstack/react-query';
-import { supabase } from './supabase';
 
 // ---------------------------------------------------------------------------
 // Types — mirror the original generated schemas from api.schemas.ts
@@ -163,357 +162,75 @@ export class ApiError<T = unknown> extends Error {
   }
 }
 
-// ---------------------------------------------------------------------------
-// DB row shapes (snake_case from Supabase)
-// ---------------------------------------------------------------------------
+// API HTTP da PROJETECH: utiliza o servidor Express e PostgreSQL do Replit.
+// Em ambientes com front e API separados, configure VITE_API_BASE_URL.
+// Nunca exponha DATABASE_URL no navegador.
+const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
-interface ProductRow {
-  id: number;
-  code: string;
-  name: string;
-  description: string | null;
-  sale_price: number;
-  cost_price: number | null;
-  current_stock: number;
-  minimum_stock: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
+async function request<T>(route: string, options?: RequestInit): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${apiBase}/api${route}`, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+    });
+  } catch {
+    throw new ApiError('Não foi possível conectar à API. Verifique se o servidor está ativo.', 503);
+  }
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new ApiError(body?.error || `Erro HTTP ${response.status}`, response.status, body);
+  }
+  return body as T;
 }
 
-interface MovementRow {
-  id: number;
-  product_id: number;
-  type: 'ENTRY' | 'EXIT';
-  quantity: number;
-  unit_price: number | null;
-  stock_before: number;
-  stock_after: number;
-  movement_date: string;
-  reason: string | null;
-  notes: string | null;
-  created_at: string;
+function queryString(params?: Record<string, unknown>): string {
+  if (!params) return '';
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') q.set(key, String(value));
+  });
+  return q.size ? `?${q.toString()}` : '';
 }
 
-// ---------------------------------------------------------------------------
-// Mappers
-// ---------------------------------------------------------------------------
-
-function mapProduct(row: ProductRow): Product {
-  return {
-    id: row.id,
-    code: row.code,
-    name: row.name,
-    description: row.description,
-    salePrice: Number(row.sale_price),
-    costPrice: row.cost_price !== null ? Number(row.cost_price) : null,
-    currentStock: row.current_stock,
-    minimumStock: row.minimum_stock,
-    active: row.active,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
-
-function mapMovement(
-  row: MovementRow & { products?: { name: string } },
-): Movement {
-  return {
-    id: row.id,
-    productId: row.product_id,
-    productName: row.products?.name ?? '',
-    type: row.type,
-    quantity: row.quantity,
-    unitPrice: row.unit_price !== null ? Number(row.unit_price) : null,
-    stockBefore: row.stock_before,
-    stockAfter: row.stock_after,
-    movementDate: row.movement_date,
-    reason: row.reason,
-    notes: row.notes,
-    createdAt: row.created_at,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Data access functions
-// ---------------------------------------------------------------------------
+const json = (data: unknown): RequestInit => ({ method: 'POST', body: JSON.stringify(data) });
+const patch = (data: unknown): RequestInit => ({ method: 'PATCH', body: JSON.stringify(data) });
 
 async function fetchProducts(params?: ListProductsParams): Promise<Product[]> {
-  let query = supabase.from('products').select('*');
-
-  if (params?.search) {
-    const ilike = `%${params.search}%`;
-    query = query.or(`name.ilike.${ilike},code.ilike.${ilike}`);
-  }
-  if (params?.active !== undefined) {
-    query = query.eq('active', params.active);
-  }
-
-  query = query.order('name');
-
-  const { data, error } = await query;
-  if (error) throw new ApiError(error.message, 500, error);
-
-  let rows = data as ProductRow[];
-  if (params?.lowStock) {
-    rows = rows.filter((p) => p.current_stock <= p.minimum_stock);
-  }
-
-  return rows.map(mapProduct);
+  return request<Product[]>(`/products${queryString(params)}`);
 }
-
 async function fetchProduct(id: number): Promise<Product> {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
-  if (error) throw new ApiError(error.message, 500, error);
-  if (!data) throw new ApiError('Produto não encontrado.', 404);
-  return mapProduct(data as ProductRow);
+  return request<Product>(`/products/${id}`);
 }
-
 async function createProduct(input: ProductInput): Promise<Product> {
-  const initialStock = input.initialStock ?? 0;
-
-  const { data: productRow, error: insertError } = await supabase
-    .from('products')
-    .insert({
-      code: input.code.trim(),
-      name: input.name.trim(),
-      description: input.description ?? null,
-      sale_price: input.salePrice,
-      cost_price: input.costPrice ?? null,
-      current_stock: initialStock,
-      minimum_stock: input.minimumStock,
-    })
-    .select('*')
-    .single();
-  if (insertError) {
-    if (insertError.code === '23505') {
-      throw new ApiError('Já existe um produto com este código.', 409);
-    }
-    throw new ApiError(insertError.message, 400, insertError);
-  }
-
-  if (initialStock > 0) {
-    const { error: moveError } = await supabase
-      .from('stock_movements')
-      .insert({
-        product_id: (productRow as ProductRow).id,
-        type: 'ENTRY',
-        quantity: initialStock,
-        unit_price: input.costPrice ?? null,
-        stock_before: 0,
-        stock_after: initialStock,
-        movement_date: new Date().toISOString(),
-        reason: 'Estoque inicial',
-        notes: 'Saldo informado no cadastro do produto',
-      });
-    if (moveError) throw new ApiError(moveError.message, 500, moveError);
-  }
-
-  return mapProduct(productRow as ProductRow);
+  return request<Product>('/products', json(input));
 }
-
-async function updateProduct(
-  id: number,
-  input: ProductUpdate,
-): Promise<Product> {
-  const updates: Record<string, unknown> = {};
-  if (input.code !== undefined) updates.code = input.code.trim();
-  if (input.name !== undefined) updates.name = input.name.trim();
-  if (input.description !== undefined) updates.description = input.description;
-  if (input.salePrice !== undefined) updates.sale_price = input.salePrice;
-  if (input.costPrice !== undefined) updates.cost_price = input.costPrice;
-  if (input.minimumStock !== undefined) updates.minimum_stock = input.minimumStock;
-
-  if (Object.keys(updates).length === 0) {
-    return fetchProduct(id);
-  }
-
-  const { data, error } = await supabase
-    .from('products')
-    .update(updates)
-    .eq('id', id)
-    .select('*')
-    .maybeSingle();
-  if (error) {
-    if (error.code === '23505') {
-      throw new ApiError('Já existe um produto com este código.', 409);
-    }
-    throw new ApiError(error.message, 400, error);
-  }
-  if (!data) throw new ApiError('Produto não encontrado.', 404);
-  return mapProduct(data as ProductRow);
+async function updateProduct(id: number, input: ProductUpdate): Promise<Product> {
+  return request<Product>(`/products/${id}`, patch(input));
 }
-
-async function toggleProductStatus(
-  id: number,
-  input: ProductStatusInput,
-): Promise<Product> {
-  const { data, error } = await supabase
-    .from('products')
-    .update({ active: input.active })
-    .eq('id', id)
-    .select('*')
-    .maybeSingle();
-  if (error) throw new ApiError(error.message, 500, error);
-  if (!data) throw new ApiError('Produto não encontrado.', 404);
-  return mapProduct(data as ProductRow);
+async function toggleProductStatus(id: number, input: ProductStatusInput): Promise<Product> {
+  return request<Product>(`/products/${id}/status`, patch(input));
 }
-
-async function fetchMovements(
-  params?: ListMovementsParams,
-): Promise<Movement[]> {
-  let query = supabase
-    .from('stock_movements')
-    .select('*, products(name)')
-    .order('movement_date', { ascending: false })
-    .order('id', { ascending: false });
-
-  if (params?.productId !== undefined) {
-    query = query.eq('product_id', params.productId);
-  }
-  if (params?.type) {
-    query = query.eq('type', params.type);
-  }
-  if (params?.from) {
-    query = query.gte('movement_date', `${params.from}T00:00:00.000Z`);
-  }
-  if (params?.to) {
-    query = query.lte('movement_date', `${params.to}T23:59:59.999Z`);
-  }
-  if (params?.limit !== undefined) {
-    query = query.limit(params.limit);
-  }
-
-  const { data, error } = await query;
-  if (error) throw new ApiError(error.message, 500, error);
-  return (data as (MovementRow & { products: { name: string } })[]).map(
-    mapMovement,
-  );
+async function fetchMovements(params?: ListMovementsParams): Promise<Movement[]> {
+  return request<Movement[]>(`/movements${queryString(params)}`);
 }
-
-async function createMovement(
-  kind: 'ENTRY' | 'EXIT',
-  input: MovementInput,
-): Promise<Movement> {
-  const { data, error } = await supabase.rpc('create_movement', {
-    p_product_id: input.productId,
-    p_movement_type: kind,
-    p_quantity: input.quantity,
-    p_unit_price: input.unitPrice ?? null,
-    p_movement_date: input.movementDate,
-    p_reason: input.reason ?? null,
-    p_notes: input.notes ?? null,
-  });
-  if (error) {
-    const msg = error.message || 'Erro inesperado.';
-    const status =
-      msg.includes('não encontrado') ? 404 :
-      msg.includes('Estoque insuficiente') ? 409 :
-      400;
-    throw new ApiError(msg, status, error);
-  }
-  return data as unknown as Movement;
+async function createMovement(kind: 'ENTRY' | 'EXIT', input: MovementInput): Promise<Movement> {
+  return request<Movement>(`/movements/${kind === 'ENTRY' ? 'entry' : 'exit'}`, json(input));
 }
-
 async function fetchDashboardSummary(): Promise<DashboardSummary> {
-  const { data: products, error: pErr } = await supabase
-    .from('products')
-    .select('*')
-    .eq('active', true);
-  if (pErr) throw new ApiError(pErr.message, 500, pErr);
-
-  const { data: movements, error: mErr } = await supabase
-    .from('stock_movements')
-    .select('movement_date');
-  if (mErr) throw new ApiError(mErr.message, 500, mErr);
-
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const movementsThisMonth = (movements as { movement_date: string }[]).filter(
-    (m) => new Date(m.movement_date) >= monthStart,
-  ).length;
-
-  const rows = (products as ProductRow[]);
-  return {
-    activeProducts: rows.length,
-    totalItems: rows.reduce((s, p) => s + p.current_stock, 0),
-    lowStockProducts: rows.filter(
-      (p) => p.current_stock <= p.minimum_stock,
-    ).length,
-    movementsThisMonth,
-    stockValue: rows.reduce(
-      (s, p) => s + p.current_stock * Number(p.cost_price ?? p.sale_price),
-      0,
-    ),
-  };
+  return request<DashboardSummary>('/dashboard/summary');
 }
-
 async function fetchLowStockProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('active', true)
-    .order('name');
-  if (error) throw new ApiError(error.message, 500, error);
-
-  return (data as ProductRow[])
-    .filter((p) => p.current_stock <= p.minimum_stock)
-    .sort((a, b) => a.current_stock - b.current_stock || a.name.localeCompare(b.name))
-    .map(mapProduct);
+  return request<Product[]>('/dashboard/low-stock');
 }
-
-async function fetchRecentMovements(
-  params?: GetRecentMovementsParams,
-): Promise<Movement[]> {
-  return fetchMovements({ limit: params?.limit ?? 10 });
+async function fetchRecentMovements(params?: GetRecentMovementsParams): Promise<Movement[]> {
+  return request<Movement[]>(`/dashboard/recent-movements${queryString(params)}`);
 }
-
 async function fetchStockReport(): Promise<StockReportItem[]> {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('active', true)
-    .order('name');
-  if (error) throw new ApiError(error.message, 500, error);
-
-  return (data as ProductRow[]).map((p) => ({
-    productId: p.id,
-    code: p.code,
-    name: p.name,
-    currentStock: p.current_stock,
-    minimumStock: p.minimum_stock,
-    salePrice: Number(p.sale_price),
-    stockValue:
-      p.current_stock * Number(p.cost_price ?? p.sale_price),
-    status:
-      p.current_stock === 0
-        ? 'OUT'
-        : p.current_stock <= p.minimum_stock
-          ? 'LOW'
-          : 'OK',
-  }));
+  return request<StockReportItem[]>('/reports/stock');
 }
-
-async function fetchMovementReport(
-  params?: GetMovementReportParams,
-): Promise<MovementReport> {
-  const movements = await fetchMovements({
-    from: params?.from,
-    to: params?.to,
-    limit: 10000,
-  });
-  const entries = movements.filter((m) => m.type === 'ENTRY');
-  const exits = movements.filter((m) => m.type === 'EXIT');
-  return {
-    entries: entries.length,
-    exits: exits.length,
-    totalEntryItems: entries.reduce((s, m) => s + m.quantity, 0),
-    totalExitItems: exits.reduce((s, m) => s + m.quantity, 0),
-  };
+async function fetchMovementReport(params?: GetMovementReportParams): Promise<MovementReport> {
+  return request<MovementReport>(`/reports/movements${queryString(params)}`);
 }
 
 // ---------------------------------------------------------------------------
