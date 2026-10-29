@@ -8,11 +8,13 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { productsTable } from "./products";
+import { usersTable } from "./auth-users";
 
 export const movementTypeEnum = pgEnum("movement_type", ["ENTRY", "EXIT"]);
 
 export const stockMovementsTable = pgTable("stock_movements", {
   id: serial("id").primaryKey(),
+  ownerId: integer("owner_id").references(() => usersTable.id),
   productId: integer("product_id")
     .notNull()
     .references(() => productsTable.id),
