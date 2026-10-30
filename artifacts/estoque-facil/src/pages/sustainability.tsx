@@ -41,7 +41,7 @@ export default function Sustainability() {
       });
       if (!response.ok) {
         const body = await response.json().catch(() => ({})) as { error?: string };
-        throw new Error(body.error || "Não foi possível registrar a ação.");
+        throw new Error(body.error || `Não foi possível registrar a ação (HTTP ${response.status}).`);
       }
       setQuantity("1"); setNotes("");
       await Promise.all([refresh(), qc.invalidateQueries({ queryKey: getListProductsQueryKey() }), qc.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() }), qc.invalidateQueries({ queryKey: getListMovementsQueryKey() })]);
