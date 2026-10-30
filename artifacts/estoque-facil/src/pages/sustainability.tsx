@@ -6,6 +6,7 @@ import { PageHeader, LoadingState, ErrorState } from "@/components/ui";
 
 type Action = "REUSE" | "RECYCLE" | "DISPOSE";
 type RecordItem = { id: number; productId: number; productName: string; action: Action; quantity: number; notes: string | null; createdAt: string };
+const environmentUrl = `${(import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "")}/api/environment/actions`;
 const labels: Record<Action, string> = { REUSE: "Reaproveitamento", RECYCLE: "Reciclagem", DISPOSE: "Descarte" };
 export default function Sustainability() {
   const products = useListProducts({});
@@ -21,7 +22,7 @@ export default function Sustainability() {
   async function refresh() {
     setLoading(true);
     try {
-      const response = await fetch("/api/environment/actions", { credentials: "include" });
+      const response = await fetch(environmentUrl, { credentials: "include" });
       if (!response.ok) throw new Error("Não foi possível carregar o histórico ambiental. Confira se a tabela foi criada no banco.");
       setRecords(await response.json() as RecordItem[]);
       setError("");
@@ -35,7 +36,7 @@ export default function Sustainability() {
     if (!productId || !Number.isSafeInteger(amount) || amount <= 0) { setError("Selecione um material e informe uma quantidade inteira positiva."); return; }
     setSaving(true); setError("");
     try {
-      const response = await fetch("/api/environment/actions", {
+      const response = await fetch(environmentUrl, {
         method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId: Number(productId), action, quantity: amount, notes }),
       });
