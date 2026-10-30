@@ -6,7 +6,7 @@ import { PageHeader, LoadingState, ErrorState } from "@/components/ui";
 
 type Action = "REUSE" | "RECYCLE" | "DISPOSE";
 type RecordItem = { id: number; productId: number; productName: string; action: Action; quantity: number; notes: string | null; createdAt: string };
-const environmentUrl = `${(import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "")}/api/environment/actions`;
+const environmentUrl = `${(import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "")}/api/movements`;
 const labels: Record<Action, string> = { REUSE: "Reaproveitamento", RECYCLE: "Reciclagem", DISPOSE: "Descarte" };
 export default function Sustainability() {
   const products = useListProducts({});
@@ -23,8 +23,9 @@ export default function Sustainability() {
     setLoading(true);
     try {
       const response = await fetch(environmentUrl, { credentials: "include" });
-      if (!response.ok) throw new Error("Não foi possível carregar o histórico ambiental. Confira se a tabela foi criada no banco.");
-      setRecords(await response.json() as RecordItem[]);
+      if (!response.ok) throw new Error(`Não foi possível carregar o histórico (HTTP ${response.status}).`);
+      const movements = await response.json() as Array<{ id: number; productId: number; productName: string; type: string; quantity: number; reason: string | null; notes: string | null; movementDate: string }>;
+      setRecords(movements.filter(m => m.type === "EXIT" && m.reason?.startsWith("AMBIENTAL:")).map(m => ({ id: m.id, productId: m.productId, productName: m.productName, action: m.reason!.slice(10) as Action, quantity: m.quantity, notes: m.notes, createdAt: m.movementDate })));
       setError("");
     } catch (e) { setError(e instanceof Error ? e.message : "Erro inesperado."); }
     finally { setLoading(false); }
@@ -36,9 +37,9 @@ export default function Sustainability() {
     if (!productId || !Number.isSafeInteger(amount) || amount <= 0) { setError("Selecione um material e informe uma quantidade inteira positiva."); return; }
     setSaving(true); setError("");
     try {
-      const response = await fetch(environmentUrl, {
+      const response = await fetch(`${environmentUrl}/exit`, {
         method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: Number(productId), action, quantity: amount, notes }),
+        body: JSON.stringify({ productId: Number(productId), quantity: amount, movementDate: new Date().toISOString(), reason: `AMBIENTAL:${action}`, notes }),
       });
       if (!response.ok) {
         const body = await response.json().catch(() => ({})) as { error?: string };
@@ -57,7 +58,7 @@ export default function Sustainability() {
     <PageHeader eyebrow="SCPE · PROJETEC · Sustentabilidade" title="Impacto ambiental na prática" description="Registre a destinação dos materiais e acompanhe resultados reais de reaproveitamento, reciclagem e descarte." />
     <section className="rounded-xl border border-primary/20 bg-primary/10 p-5">
       <h2 className="flex items-center gap-2 text-lg font-extrabold"><Leaf size={20} /> Menos desperdício, mais responsabilidade</h2>
-      <p className="mt-2 text-sm text-muted-foreground">Cada ação registrada retira a quantidade correspondente do estoque e fica salva no histórico da sua conta. Os indicadores representam unidades registradas, não estimativas de CO₂.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Cada ação registrada utiliza uma saída de estoque identificada como ambiental e fica salva no histórico da sua conta. Os indicadores representam unidades registradas, não estimativas de CO₂.</p>
     </section>
     <div className="grid gap-4 sm:grid-cols-3">
       {([
