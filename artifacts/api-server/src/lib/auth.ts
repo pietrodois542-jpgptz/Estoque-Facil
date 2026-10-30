@@ -74,6 +74,10 @@ export const requireSameOrigin: RequestHandler = (req, res, next) => {
 
   const origin = req.get("origin");
   const host = req.get("host");
+  // Replit reverse proxies can expose the public hostname via X-Forwarded-Host.
+  // Only trust this header when Express considers the request proxy trusted.
+  const forwardedHost = req.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const trustedForwardedHost = req.app.get("trust proxy fn")?.(req.socket.remoteAddress, 0) ? forwardedHost : undefined;
 
   if (!origin || !host) {
     res.status(403).json({ error: "Origem da solicitação não permitida." });
@@ -82,7 +86,8 @@ export const requireSameOrigin: RequestHandler = (req, res, next) => {
 
   try {
     const originHost = new URL(origin).host;
-    if (originHost.toLowerCase() !== host.toLowerCase()) {
+    const allowedHosts = [host, trustedForwardedHost].filter(Boolean).map(value => value!.toLowerCase());
+    if (!allowedHosts.includes(originHost.toLowerCase())) {
       res.status(403).json({ error: "Origem da solicitação não permitida." });
       return;
     }
