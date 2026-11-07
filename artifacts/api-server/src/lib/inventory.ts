@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, lte, or, sql, type SQL } from "drizzle-orm";
 import { db, productsTable, stockMovementsTable } from "@workspace/db";
 
 export type MovementKind = "ENTRY" | "EXIT";
@@ -43,7 +43,7 @@ export async function listProducts(ownerId: number, filters: {
   lowStock?: boolean;
   active?: boolean;
 }) {
-  const conditions = [eq(productsTable.ownerId, ownerId)];
+  const conditions: (SQL | undefined)[] = [eq(productsTable.ownerId, ownerId)];
   if (filters.search) {
     const search = `%${filters.search}%`;
     conditions.push(

@@ -162,7 +162,7 @@ export class ApiError<T = unknown> extends Error {
   }
 }
 
-// API HTTP da PROJETECH: utiliza o servidor Express e PostgreSQL do Replit.
+// API HTTP do SCPE: utiliza o servidor Express e PostgreSQL do Replit.
 // Em ambientes com front e API separados, configure VITE_API_BASE_URL.
 // Nunca exponha DATABASE_URL no navegador.
 const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
