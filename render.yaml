@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: scpe-tcc
+    runtime: node
+    branch: tcc-scpe
+    plan: free
+    healthCheckPath: /api/healthz
+    buildCommand: pnpm install --frozen-lockfile --ignore-scripts --prod=false && pnpm --filter @workspace/api-server run build && PORT=26003 BASE_PATH=/ pnpm --filter @workspace/estoque-facil run build && node scripts/init-render-db.mjs
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: SCPE_SERVE_WEB
+        value: "1"
+      - key: DATABASE_URL
+        sync: false
