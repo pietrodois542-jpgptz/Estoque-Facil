@@ -4,6 +4,7 @@ services:
     runtime: node
     branch: tcc-scpe
     plan: free
+    region: ohio
     healthCheckPath: /api/healthz
     buildCommand: pnpm install --frozen-lockfile --ignore-scripts --prod=false && pnpm --filter @workspace/api-server run build && PORT=26003 BASE_PATH=/ pnpm --filter @workspace/estoque-facil run build && node scripts/init-render-db.mjs
     startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
